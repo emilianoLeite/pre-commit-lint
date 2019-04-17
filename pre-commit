@@ -1,0 +1,30 @@
+#! /usr/bin/env ruby
+
+# Bonus! Colors are pretty!
+def red(str)
+  "\e[31m#{str}\e[0m"
+end
+
+def system!(*args)
+  system(*args) || abort(red("Commit failed"))
+end
+
+def lint_files(files_as_cli_agrs)
+  puts("linting files: #{files_as_cli_agrs}")
+  puts("...")
+
+  system!("bundle exec standardrb --force-exclusion --fix #{files_as_cli_agrs}")
+  system("git add #{files_as_cli_agrs}") # stage changes made by linter
+
+  puts("files linted.")
+end
+
+string_of_all_staged_ruby_files = `git diff --cached --diff-filter=d --name-only | grep '\.rb$'`
+
+staged_files_as_cli_agrs = string_of_all_staged_ruby_files.tr("\n", " ")
+
+unless staged_files_as_cli_agrs.empty?
+  lint_files(staged_files_as_cli_agrs)
+end
+
+
